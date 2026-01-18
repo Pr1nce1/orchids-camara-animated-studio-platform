@@ -135,13 +135,7 @@ export default function AdminLogin() {
             </motion.button>
           </form>
 
-          <div className="mt-6 p-4 bg-[#F8F9FA] rounded-xl">
-            <p className="text-sm text-[#607D8B] text-center">
-              <strong>Demo Credentials:</strong><br />
-              Email: admin@camara.studio<br />
-              Password: admin123
-            </p>
-          </div>
+
         </div>
       </motion.div>
     </div>

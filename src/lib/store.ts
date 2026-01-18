@@ -107,6 +107,7 @@ export interface SiteSettings {
 interface AdminState {
   isAuthenticated: boolean;
   adminUser: { email: string; name: string } | null;
+  adminPassword: string;
 }
 
 interface StoreState {
@@ -147,9 +148,10 @@ interface StoreState {
   setHeroSettings: (settings: HeroSettings) => void;
   setSiteSettings: (settings: SiteSettings) => void;
 
-  login: (email: string, password: string) => boolean;
-  logout: () => void;
-}
+    login: (email: string, password: string) => boolean;
+    logout: () => void;
+    changePassword: (currentPassword: string, newPassword: string) => boolean;
+  }
 
 const defaultStatistics: Statistic[] = [
   { id: "1", icon: "Trophy", label: "Years of Experience", value: 32, suffix: "+", prefix: "", color: "#FFB300", order: 1, enabled: true },
@@ -265,7 +267,7 @@ export const useStore = create<StoreState>()(
       services: defaultServices,
       heroSettings: defaultHeroSettings,
       siteSettings: defaultSiteSettings,
-      admin: { isAuthenticated: false, adminUser: null },
+      admin: { isAuthenticated: false, adminUser: null, adminPassword: "Camaramtm" },
 
       setStatistics: (stats) => set({ statistics: stats }),
       addStatistic: (stat) => set((state) => ({ statistics: [...state.statistics, stat] })),
@@ -295,13 +297,15 @@ export const useStore = create<StoreState>()(
       setHeroSettings: (settings) => set({ heroSettings: settings }),
       setSiteSettings: (settings) => set({ siteSettings: settings }),
 
-      login: (email, password) => {
-        if (email === "admin@camara.studio" && password === "admin123") {
-          set({ admin: { isAuthenticated: true, adminUser: { email, name: "Admin" } } });
-          return true;
-        }
-        return false;
-      },
+login: (email, password) => {
+          const state = useStore.getState();
+          const storedPassword = state.admin.adminPassword || "Camaramtm";
+          if (email === "admin@camara.studio" && password === storedPassword) {
+            set({ admin: { ...state.admin, isAuthenticated: true, adminUser: { email, name: "Admin" } } });
+            return true;
+          }
+          return false;
+        },
       logout: () => set({ admin: { isAuthenticated: false, adminUser: null } }),
     }),
     { name: "camara-store" }

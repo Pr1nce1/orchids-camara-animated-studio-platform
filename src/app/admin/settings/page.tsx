@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Save, Phone, Mail, MapPin, Globe, Instagram, Facebook, Youtube, Twitter, Search, FileText } from "lucide-react";
+import { Save, Phone, Mail, MapPin, Globe, Instagram, Facebook, Youtube, Twitter, Search, FileText, Lock, Eye, EyeOff } from "lucide-react";
 import { useStore, SiteSettings } from "@/lib/store";
 
 const defaultSeo = {
@@ -13,7 +13,7 @@ const defaultSeo = {
 };
 
 export default function SettingsPage() {
-  const { siteSettings, setSiteSettings } = useStore();
+  const { siteSettings, setSiteSettings, changePassword } = useStore();
   const [settings, setSettings] = useState<SiteSettings>({
     ...siteSettings,
     whatsappNumber: siteSettings.whatsappNumber || "+919845374999",
@@ -21,6 +21,15 @@ export default function SettingsPage() {
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   useEffect(() => {
     setSettings({
@@ -56,6 +65,37 @@ export default function SettingsPage() {
       ...prev,
       seo: { ...prev.seo, [field]: value },
     }));
+  };
+
+  const handlePasswordChange = () => {
+    setPasswordError("");
+    setPasswordSuccess(false);
+    
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError("All password fields are required");
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters");
+      return;
+    }
+    
+    const success = changePassword(currentPassword, newPassword);
+    if (success) {
+      setPasswordSuccess(true);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setTimeout(() => setPasswordSuccess(false), 3000);
+    } else {
+      setPasswordError("Current password is incorrect");
+    }
   };
 
   return (
@@ -284,10 +324,116 @@ export default function SettingsPage() {
                 placeholder="https://example.com/og-image.jpg"
               />
               <p className="text-xs text-[#90A4AE] mt-1">Image shown when your site is shared on social media (1200x630px recommended)</p>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white rounded-2xl p-6 shadow-sm border border-[#E0E0E0]"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-[#FFF3E0] rounded-xl flex items-center justify-center">
+                <Lock className="w-5 h-5 text-[#FF9800]" />
+              </div>
+              <h2 className="text-xl font-display font-bold text-[#263238]">Change Password</h2>
+            </div>
+
+            <div className="grid gap-4 max-w-md">
+              <div>
+                <label className="block text-sm font-medium text-[#607D8B] mb-2">Current Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#90A4AE]" />
+                  <input
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full pl-11 pr-11 py-3 rounded-xl border border-[#E0E0E0] focus:border-[#0288D1] focus:ring-2 focus:ring-[#0288D1]/20 outline-none transition-all"
+                    placeholder="Enter current password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#90A4AE] hover:text-[#607D8B]"
+                  >
+                    {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#607D8B] mb-2">New Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#90A4AE]" />
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full pl-11 pr-11 py-3 rounded-xl border border-[#E0E0E0] focus:border-[#0288D1] focus:ring-2 focus:ring-[#0288D1]/20 outline-none transition-all"
+                    placeholder="Enter new password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#90A4AE] hover:text-[#607D8B]"
+                  >
+                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#607D8B] mb-2">Confirm New Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#90A4AE]" />
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full pl-11 pr-11 py-3 rounded-xl border border-[#E0E0E0] focus:border-[#0288D1] focus:ring-2 focus:ring-[#0288D1]/20 outline-none transition-all"
+                    placeholder="Confirm new password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#90A4AE] hover:text-[#607D8B]"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {passwordError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl"
+                >
+                  {passwordError}
+                </motion.div>
+              )}
+
+              {passwordSuccess && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-3 bg-green-50 border border-green-200 text-green-600 text-sm rounded-xl"
+                >
+                  Password changed successfully!
+                </motion.div>
+              )}
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handlePasswordChange}
+                className="w-fit px-6 py-3 bg-gradient-to-r from-[#FF9800] to-[#FFB74D] text-white rounded-xl font-medium shadow-lg shadow-[#FF9800]/20 hover:shadow-xl transition-all"
+              >
+                Update Password
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
